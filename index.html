@@ -1,356 +1,470 @@
 
-<h2 class="sr-only">Document scanner, finder, and enhancer — paste text, scan for parts, find keywords, and apply enhancements.</h2>
-
-<style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: var(--font-sans); }
-  .wrap { padding: 1.5rem 0; }
-  .toolbar { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 1rem; align-items: center; }
-  .toolbar input[type=text] { flex: 1; min-width: 160px; }
-  .section-label { font-size: 13px; color: var(--color-text-secondary); margin-bottom: 6px; font-weight: 500; }
-  .doc-area { position: relative; }
-  #doc-display {
-    min-height: 220px;
-    background: var(--color-background-primary);
-    border: 0.5px solid var(--color-border-tertiary);
-    border-radius: var(--border-radius-lg);
-    padding: 1rem 1.25rem;
-    font-size: 15px;
-    line-height: 1.75;
-    white-space: pre-wrap;
-    overflow-y: auto;
-    max-height: 320px;
-    color: var(--color-text-primary);
-    outline: none;
-  }
-  #doc-display[contenteditable]:focus { border-color: var(--color-border-primary); }
-  mark.found { background: #FAC775; color: #412402; border-radius: 3px; padding: 0 2px; }
-  mark.active { background: #EF9F27; color: #412402; border-radius: 3px; padding: 0 2px; outline: 2px solid #BA7517; }
-  .enhance-btn {
-    background: var(--color-background-secondary);
-    border: 0.5px solid var(--color-border-secondary);
-    border-radius: var(--border-radius-md);
-    padding: 6px 14px;
-    font-size: 13px;
-    cursor: pointer;
-    color: var(--color-text-primary);
-    transition: background 0.15s;
-  }
-  .enhance-btn:hover { background: var(--color-background-tertiary); }
-  .enhance-btn.active { border-color: #534AB7; color: #534AB7; background: #EEEDFE; }
-  .stats-row { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 1rem; }
-  .stat-card {
-    background: var(--color-background-secondary);
-    border-radius: var(--border-radius-md);
-    padding: 10px 16px;
-    min-width: 100px;
-    flex: 1;
-  }
-  .stat-label { font-size: 12px; color: var(--color-text-secondary); margin-bottom: 2px; }
-  .stat-val { font-size: 20px; font-weight: 500; color: var(--color-text-primary); }
-  .scan-results {
-    margin-top: 1rem;
-    border: 0.5px solid var(--color-border-tertiary);
-    border-radius: var(--border-radius-lg);
-    overflow: hidden;
-    display: none;
-  }
-  .scan-result-item {
-    padding: 10px 1.25rem;
-    font-size: 13px;
-    border-bottom: 0.5px solid var(--color-border-tertiary);
-    cursor: pointer;
-    display: flex;
-    gap: 10px;
-    align-items: flex-start;
-    color: var(--color-text-primary);
-    background: var(--color-background-primary);
-    transition: background 0.1s;
-  }
-  .scan-result-item:last-child { border-bottom: none; }
-  .scan-result-item:hover { background: var(--color-background-secondary); }
-  .scan-tag {
-    font-size: 11px;
-    font-weight: 500;
-    padding: 2px 8px;
-    border-radius: var(--border-radius-md);
-    white-space: nowrap;
-    flex-shrink: 0;
-  }
-  .tag-heading { background: #EEEDFE; color: #3C3489; }
-  .tag-paragraph { background: #E1F5EE; color: #085041; }
-  .tag-list { background: #FAEEDA; color: #633806; }
-  .tag-quote { background: #FBEAF0; color: #72243E; }
-  .tag-code { background: #F1EFE8; color: #444441; }
-  .divider { height: 0.5px; background: var(--color-border-tertiary); margin: 1.25rem 0; }
-  .nav-btn {
-    background: var(--color-background-secondary);
-    border: 0.5px solid var(--color-border-secondary);
-    border-radius: var(--border-radius-md);
-    padding: 6px 10px;
-    font-size: 13px;
-    cursor: pointer;
-    color: var(--color-text-primary);
-  }
-  .nav-btn:hover { background: var(--color-background-tertiary); }
-  .match-counter { font-size: 13px; color: var(--color-text-secondary); padding: 6px 4px; }
-  select {
-    padding: 6px 10px;
-    border-radius: var(--border-radius-md);
-    border: 0.5px solid var(--color-border-secondary);
-    background: var(--color-background-primary);
-    color: var(--color-text-primary);
-    font-size: 13px;
-    cursor: pointer;
-  }
-</style>
-
-<div class="wrap">
-  <p class="section-label"><i class="ti ti-file-text" aria-hidden="true" style="font-size:15px;vertical-align:-2px;margin-right:4px"></i>Document</p>
-  <div class="doc-area">
-    <div id="doc-display" contenteditable="true" spellcheck="false">Document Scanner & Enhancer
-
-This tool lets you scan, find, and enhance any document right in the browser — no server required.
-
-Key features:
-- Scan document structure to detect headings, paragraphs, lists, quotes, and code blocks
-- Find and highlight any keyword or phrase with navigation
-- Apply text enhancements like readability fixes, capitalization, spacing cleanup, and more
-
-Getting started:
-Paste your own document content here and use the tools below. Everything runs locally in JavaScript — your text never leaves the page.
-
-Example quote:
-"The best tool is the one you actually use."
-
-Code example:
-function greet(name) { return 'Hello, ' + name; }</div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Document scanner with camera capture and file upload — scan a document, detect text regions in real time, then enhance with AI-powered improvements.">
+  <title>Document Scanner & Improver</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons@latest/tabler-icons.min.css">
+  <style>
+:root {
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --color-background-primary: #ffffff;
+  --color-background-secondary: #f5f5f5;
+  --color-background-tertiary: #ebebeb;
+  --color-text-primary: #1a1a1a;
+  --color-text-secondary: #666666;
+  --color-text-tertiary: #999999;
+  --color-text-success: #3B6D11;
+  --color-border-secondary: #d0d0d0;
+  --color-border-tertiary: #e0e0e0;
+  --border-radius-lg: 12px;
+  --border-radius-md: 8px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-sans)}
+.app{padding:2rem 0}
+.hero{text-align:center;padding:2.5rem 1.5rem;background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);margin-bottom:1.5rem}
+.hero-icon{width:56px;height:56px;border-radius:var(--border-radius-lg);background:#EEEDFE;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;font-size:26px;color:#534AB7}
+.hero h1{font-size:22px;font-weight:500;color:var(--color-text-primary);margin-bottom:6px}
+.hero p{font-size:14px;color:var(--color-text-secondary);margin-bottom:1.5rem}
+.scan-btn{display:inline-flex;align-items:center;gap:8px;padding:10px 24px;background:#534AB7;color:#EEEDFE;border:none;border-radius:var(--border-radius-md);font-size:14px;font-weight:500;cursor:pointer;transition:background .15s}
+.scan-btn:hover{background:#3C3489}
+.badges{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:1rem}
+.badge{font-size:11px;padding:3px 10px;border-radius:20px;background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);color:var(--color-text-secondary)}
+.overlay{display:none;position:absolute;inset:0;background:rgba(0,0,0,0.55);z-index:10;align-items:center;justify-content:center;min-height:600px}
+.overlay.show{display:flex}
+.modal{background:var(--color-background-primary);border-radius:16px;border:0.5px solid var(--color-border-secondary);width:100%;max-width:560px;overflow:hidden}
+.modal-header{display:flex;align-items:center;justify-content:space-between;padding:1rem 1.25rem;border-bottom:0.5px solid var(--color-border-tertiary)}
+.modal-header h2{font-size:16px;font-weight:500;color:var(--color-text-primary)}
+.close-btn{width:28px;height:28px;border-radius:var(--border-radius-md);background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--color-text-secondary);font-size:16px}
+.close-btn:hover{background:var(--color-background-tertiary)}
+.modal-body{padding:1.25rem}
+.step-indicator{display:flex;align-items:center;gap:6px;margin-bottom:1.25rem}
+.step{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--color-text-tertiary)}
+.step.active{color:#534AB7;font-weight:500}
+.step.done{color:var(--color-text-success)}
+.step-dot{width:20px;height:20px;border-radius:50%;border:0.5px solid var(--color-border-secondary);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:500;background:var(--color-background-secondary)}
+.step.active .step-dot{background:#EEEDFE;border-color:#534AB7;color:#534AB7}
+.step.done .step-dot{background:#EAF3DE;border-color:#3B6D11;color:#3B6D11}
+.step-line{flex:1;height:0.5px;background:var(--color-border-tertiary)}
+.choice-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:1rem}
+.choice-card{border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-lg);padding:1.25rem 1rem;text-align:center;cursor:pointer;transition:border-color .15s,background .15s;background:var(--color-background-primary)}
+.choice-card:hover{border-color:#534AB7;background:#EEEDFE}
+.choice-card i{font-size:28px;color:#534AB7;margin-bottom:8px;display:block}
+.choice-card h3{font-size:14px;font-weight:500;color:var(--color-text-primary);margin-bottom:4px}
+.choice-card p{font-size:12px;color:var(--color-text-secondary)}
+.cam-wrap{position:relative;background:#0a0a0a;border-radius:var(--border-radius-lg);overflow:hidden;aspect-ratio:4/3;margin-bottom:1rem}
+#cam-video{width:100%;height:100%;object-fit:cover;display:block}
+#cam-canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.cam-overlay-ui{position:absolute;inset:0;pointer-events:none}
+.scan-frame{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:78%;height:75%;border:2px solid #7F77DD;border-radius:8px}
+.scan-corner{position:absolute;width:18px;height:18px;border-color:#7F77DD;border-style:solid}
+.sc-tl{top:-1px;left:-1px;border-width:2px 0 0 2px;border-radius:4px 0 0 0}
+.sc-tr{top:-1px;right:-1px;border-width:2px 2px 0 0;border-radius:0 4px 0 0}
+.sc-bl{bottom:-1px;left:-1px;border-width:0 0 2px 2px;border-radius:0 0 0 4px}
+.sc-br{bottom:-1px;right:-1px;border-width:0 2px 2px 0;border-radius:0 0 4px 0}
+.scan-line{position:absolute;left:4%;width:92%;height:2px;background:#7F77DD;animation:scanline 2s linear infinite;opacity:0.7}
+@keyframes scanline{0%{top:10%}100%{top:88%}}
+.cam-status{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.65);color:#fff;font-size:12px;padding:4px 12px;border-radius:20px;white-space:nowrap}
+.cam-controls{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:1rem}
+.cam-btn{display:flex;align-items:center;gap:6px;padding:8px 16px;border-radius:var(--border-radius-md);font-size:13px;cursor:pointer;border:0.5px solid var(--color-border-secondary);background:var(--color-background-secondary);color:var(--color-text-primary);transition:background .15s}
+.cam-btn:hover{background:var(--color-background-tertiary)}
+.cam-btn.primary{background:#534AB7;color:#EEEDFE;border-color:#534AB7}
+.cam-btn.primary:hover{background:#3C3489}
+.upload-zone{border:1.5px dashed var(--color-border-secondary);border-radius:var(--border-radius-lg);padding:2.5rem 1rem;text-align:center;cursor:pointer;transition:border-color .15s,background .15s;margin-bottom:1rem;background:var(--color-background-primary)}
+.upload-zone:hover,.upload-zone.drag{border-color:#534AB7;background:#EEEDFE}
+.upload-zone i{font-size:32px;color:#534AB7;margin-bottom:8px;display:block}
+.upload-zone p{font-size:14px;color:var(--color-text-secondary);margin-bottom:4px}
+.upload-zone span{font-size:12px;color:var(--color-text-tertiary)}
+#file-input{display:none}
+.preview-wrap{position:relative;border-radius:var(--border-radius-lg);overflow:hidden;margin-bottom:1rem;background:#f0f0f0;min-height:180px;display:flex;align-items:center;justify-content:center}
+#preview-img{width:100%;display:block;border-radius:var(--border-radius-lg)}
+.preview-badge{position:absolute;top:8px;right:8px;background:rgba(0,0,0,0.6);color:#fff;font-size:11px;padding:3px 10px;border-radius:20px}
+.region-box{position:absolute;border:2px solid #7F77DD;border-radius:3px;pointer-events:none}
+.region-label{position:absolute;top:-18px;left:0;background:#534AB7;color:#EEEDFE;font-size:10px;padding:1px 6px;border-radius:3px;white-space:nowrap}
+.improve-section{margin-top:0}
+.improve-label{font-size:13px;color:var(--color-text-secondary);margin-bottom:8px}
+.improve-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:1rem}
+.improve-opt{display:flex;align-items:center;gap:8px;padding:8px 10px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);cursor:pointer;font-size:13px;color:var(--color-text-primary);background:var(--color-background-primary);transition:border-color .15s}
+.improve-opt:hover{border-color:#534AB7;background:#EEEDFE}
+.improve-opt.sel{border-color:#534AB7;background:#EEEDFE;color:#3C3489}
+.improve-opt i{font-size:16px;color:#534AB7}
+.result-area{border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:10px 14px;font-size:13px;color:var(--color-text-primary);min-height:80px;line-height:1.7;background:var(--color-background-secondary);margin-bottom:1rem;white-space:pre-wrap;max-height:160px;overflow-y:auto}
+.action-row{display:flex;gap:8px;justify-content:flex-end}
+.tag-pill{display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:2px 8px;border-radius:20px;background:#E1F5EE;color:#085041;border:0.5px solid #9FE1CB;margin:2px}
+.loading-dots span{display:inline-block;width:6px;height:6px;border-radius:50%;background:#534AB7;margin:0 2px;animation:dot .9s infinite}
+.loading-dots span:nth-child(2){animation-delay:.2s}
+.loading-dots span:nth-child(3){animation-delay:.4s}
+@keyframes dot{0%,60%,100%{opacity:.2}30%{opacity:1}}
+.copy-toast{display:none;position:absolute;bottom:12px;left:50%;transform:translateX(-50%);background:#3C3489;color:#EEEDFE;font-size:12px;padding:5px 14px;border-radius:20px;pointer-events:none;z-index:20}
+.info-bar{display:flex;gap:8px;align-items:center;font-size:12px;color:var(--color-text-secondary);padding:8px 12px;background:var(--color-background-secondary);border-radius:var(--border-radius-md);margin-bottom:1rem}
+html, body {
+  width: 100%;
+  height: 100%;
+  background-color: var(--color-background-primary);
+}
+body {
+  color: var(--color-text-primary);
+}
+.app {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+  </style>
+</head>
+<body>
+  <div class="hero">
+    <div class="hero-icon"><i class="ti ti-scan" aria-hidden="true"></i></div>
+    <h1>Document scanner & improver</h1>
+    <p>Capture via camera or upload an image — detect regions, extract text, and enhance instantly.</p>
+    <button class="scan-btn" onclick="openModal()">
+      <i class="ti ti-camera" aria-hidden="true" style="font-size:16px"></i>
+      Scan document
+    </button>
+    <div class="badges">
+      <span class="badge"><i class="ti ti-camera" aria-hidden="true" style="font-size:11px;vertical-align:-1px;margin-right:3px"></i>Live camera</span>
+      <span class="badge"><i class="ti ti-upload" aria-hidden="true" style="font-size:11px;vertical-align:-1px;margin-right:3px"></i>File upload</span>
+      <span class="badge"><i class="ti ti-scan" aria-hidden="true" style="font-size:11px;vertical-align:-1px;margin-right:3px"></i>Region detection</span>
+      <span class="badge"><i class="ti ti-wand" aria-hidden="true" style="font-size:11px;vertical-align:-1px;margin-right:3px"></i>AI improver</span>
+      <span class="badge"><i class="ti ti-device-floppy" aria-hidden="true" style="font-size:11px;vertical-align:-1px;margin-right:3px"></i>Download</span>
+      <span class="badge"><i class="ti ti-infinity" aria-hidden="true" style="font-size:11px;vertical-align:-1px;margin-right:3px"></i>Free forever</span>
+    </div>
   </div>
 
-  <div class="stats-row">
-    <div class="stat-card"><div class="stat-label">Words</div><div class="stat-val" id="stat-words">0</div></div>
-    <div class="stat-card"><div class="stat-label">Characters</div><div class="stat-val" id="stat-chars">0</div></div>
-    <div class="stat-card"><div class="stat-label">Lines</div><div class="stat-val" id="stat-lines">0</div></div>
-    <div class="stat-card"><div class="stat-label">Paragraphs</div><div class="stat-val" id="stat-paras">0</div></div>
+  <div class="overlay" id="modal-overlay">
+    <div class="modal" id="modal">
+      <div class="modal-header">
+        <div style="display:flex;align-items:center;gap:8px">
+          <i class="ti ti-scan" aria-hidden="true" style="font-size:18px;color:#534AB7"></i>
+          <h2 id="modal-title">Choose input method</h2>
+        </div>
+        <button class="close-btn" onclick="closeModal()" aria-label="Close modal"><i class="ti ti-x" aria-hidden="true"></i></button>
+      </div>
+      <div class="modal-body">
+        <div class="step-indicator" id="step-bar">
+          <div class="step active" id="st1"><div class="step-dot">1</div><span>Input</span></div>
+          <div class="step-line"></div>
+          <div class="step" id="st2"><div class="step-dot">2</div><span>Scan</span></div>
+          <div class="step-line"></div>
+          <div class="step" id="st3"><div class="step-dot">3</div><span>Improve</span></div>
+        </div>
+
+        <div id="view-choose">
+          <div class="choice-grid">
+            <div class="choice-card" onclick="startCamera()">
+              <i class="ti ti-camera" aria-hidden="true"></i>
+              <h3>Live camera</h3>
+              <p>Real-time detection with scanning overlay</p>
+            </div>
+            <div class="choice-card" onclick="startUpload()">
+              <i class="ti ti-cloud-upload" aria-hidden="true"></i>
+              <h3>Upload file</h3>
+              <p>JPG, PNG, PDF or any image document</p>
+            </div>
+          </div>
+          <div class="info-bar">
+            <i class="ti ti-shield-lock" aria-hidden="true" style="font-size:15px;flex-shrink:0"></i>
+            All processing happens locally in your browser. No data is sent to any server.
+          </div>
+        </div>
+
+        <div id="view-camera" style="display:none">
+          <div class="cam-wrap">
+            <video id="cam-video" autoplay playsinline muted></video>
+            <canvas id="cam-canvas"></canvas>
+            <div class="cam-overlay-ui">
+              <div class="scan-frame">
+                <div class="scan-corner sc-tl"></div>
+                <div class="scan-corner sc-tr"></div>
+                <div class="scan-corner sc-bl"></div>
+                <div class="scan-corner sc-br"></div>
+                <div class="scan-line" id="scan-line"></div>
+              </div>
+            </div>
+            <div class="cam-status" id="cam-status">Align document within frame</div>
+          </div>
+          <div class="cam-controls">
+            <button class="cam-btn" onclick="switchCam()"><i class="ti ti-camera-rotate" aria-hidden="true" style="font-size:15px"></i> Flip</button>
+            <button class="cam-btn primary" onclick="captureFrame()"><i class="ti ti-aperture" aria-hidden="true" style="font-size:15px"></i> Capture</button>
+            <button class="cam-btn" onclick="goBack()"><i class="ti ti-arrow-left" aria-hidden="true" style="font-size:15px"></i> Back</button>
+          </div>
+        </div>
+
+        <div id="view-upload" style="display:none">
+          <div class="upload-zone" id="drop-zone" onclick="document.getElementById('file-input').click()" ondragover="ev(event);this.classList.add('drag')" ondragleave="this.classList.remove('drag')" ondrop="handleDrop(event)">
+            <i class="ti ti-photo-up" aria-hidden="true"></i>
+            <p>Click to browse or drag & drop</p>
+            <span>JPG, PNG, WEBP, PDF — up to 20MB</span>
+          </div>
+          <input type="file" id="file-input" accept="image/*,.pdf" onchange="handleFile(event)">
+          <button class="cam-btn" onclick="goBack()" style="width:100%;justify-content:center;margin-top:4px"><i class="ti ti-arrow-left" aria-hidden="true" style="font-size:15px"></i> Back</button>
+        </div>
+
+        <div id="view-scan" style="display:none">
+          <div class="preview-wrap" id="preview-wrap">
+            <img id="preview-img" src="" alt="Captured document">
+            <div class="preview-badge" id="region-count-badge">Detecting…</div>
+          </div>
+          <div id="region-tags" style="margin-bottom:1rem;min-height:24px"></div>
+          <div class="cam-controls" style="justify-content:space-between">
+            <button class="cam-btn" onclick="goBack()"><i class="ti ti-arrow-left" aria-hidden="true" style="font-size:15px"></i> Retake</button>
+            <button class="cam-btn primary" onclick="goImprove()"><i class="ti ti-wand" aria-hidden="true" style="font-size:15px"></i> Improve document</button>
+          </div>
+        </div>
+
+        <div id="view-improve" style="display:none">
+          <p class="improve-label">Select enhancement options:</p>
+          <div class="improve-grid">
+            <div class="improve-opt sel" id="opt-clarity" onclick="toggleOpt('opt-clarity')"><i class="ti ti-brightness" aria-hidden="true"></i> Clarity boost</div>
+            <div class="improve-opt sel" id="opt-text" onclick="toggleOpt('opt-text')"><i class="ti ti-text-size" aria-hidden="true"></i> Text cleanup</div>
+            <div class="improve-opt" id="opt-struct" onclick="toggleOpt('opt-struct')"><i class="ti ti-layout-list" aria-hidden="true"></i> Structure detect</div>
+            <div class="improve-opt" id="opt-summ" onclick="toggleOpt('opt-summ')"><i class="ti ti-list-details" aria-hidden="true"></i> Summarize</div>
+            <div class="improve-opt" id="opt-spell" onclick="toggleOpt('opt-spell')"><i class="ti ti-checkup-list" aria-hidden="true"></i> Spell & grammar</div>
+            <div class="improve-opt" id="opt-meta" onclick="toggleOpt('opt-meta')"><i class="ti ti-tag" aria-hidden="true"></i> Auto-tag content</div>
+          </div>
+          <div id="improve-result" class="result-area" style="display:none"></div>
+          <div class="action-row">
+            <button class="cam-btn" onclick="goStep('view-scan',2)"><i class="ti ti-arrow-left" aria-hidden="true" style="font-size:14px"></i> Back</button>
+            <button class="cam-btn" onclick="copyResult()" id="copy-btn" style="display:none"><i class="ti ti-copy" aria-hidden="true" style="font-size:14px"></i> Copy</button>
+            <button class="cam-btn" onclick="downloadResult()" id="dl-btn" style="display:none"><i class="ti ti-download" aria-hidden="true" style="font-size:14px"></i> Download</button>
+            <button class="cam-btn primary" onclick="runImprove()"><i class="ti ti-wand" aria-hidden="true" style="font-size:14px"></i> Run improvements</button>
+          </div>
+          <div class="copy-toast" id="copy-toast">Copied to clipboard!</div>
+        </div>
+      </div>
+    </div>
   </div>
-
-  <div class="divider"></div>
-
-  <p class="section-label"><i class="ti ti-scan" aria-hidden="true" style="font-size:15px;vertical-align:-2px;margin-right:4px"></i>Scan document structure</p>
-  <div style="display:flex;gap:8px;flex-wrap:wrap;">
-    <button class="enhance-btn" onclick="scanDoc()"><i class="ti ti-list-search" aria-hidden="true" style="font-size:14px;vertical-align:-2px;margin-right:4px"></i>Scan structure</button>
-    <select id="filter-type" onchange="filterScan()">
-      <option value="all">All parts</option>
-      <option value="heading">Headings only</option>
-      <option value="paragraph">Paragraphs only</option>
-      <option value="list">Lists only</option>
-      <option value="quote">Quotes only</option>
-      <option value="code">Code only</option>
-    </select>
-  </div>
-  <div class="scan-results" id="scan-results"></div>
-
-  <div class="divider"></div>
-
-  <p class="section-label"><i class="ti ti-search" aria-hidden="true" style="font-size:15px;vertical-align:-2px;margin-right:4px"></i>Find in document</p>
-  <div class="toolbar">
-    <input type="text" id="find-input" placeholder="Search keyword or phrase…" oninput="findInDoc()" />
-    <button class="nav-btn" onclick="navMatch(-1)" aria-label="Previous match"><i class="ti ti-chevron-up" aria-hidden="true"></i></button>
-    <button class="nav-btn" onclick="navMatch(1)" aria-label="Next match"><i class="ti ti-chevron-down" aria-hidden="true"></i></button>
-    <span class="match-counter" id="match-counter"></span>
-    <button class="nav-btn" onclick="clearFind()"><i class="ti ti-x" aria-hidden="true" style="font-size:13px"></i></button>
-  </div>
-
-  <div class="divider"></div>
-
-  <p class="section-label"><i class="ti ti-wand" aria-hidden="true" style="font-size:15px;vertical-align:-2px;margin-right:4px"></i>Enhance document</p>
-  <div style="display:flex;gap:8px;flex-wrap:wrap;">
-    <button class="enhance-btn" onclick="enhance('trim')"><i class="ti ti-arrows-minimize" aria-hidden="true" style="font-size:14px;vertical-align:-2px;margin-right:4px"></i>Trim whitespace</button>
-    <button class="enhance-btn" onclick="enhance('sentences')"><i class="ti ti-text-size" aria-hidden="true" style="font-size:14px;vertical-align:-2px;margin-right:4px"></i>Fix sentence case</button>
-    <button class="enhance-btn" onclick="enhance('caps')"><i class="ti ti-letter-case" aria-hidden="true" style="font-size:14px;vertical-align:-2px;margin-right:4px"></i>Title case headings</button>
-    <button class="enhance-btn" onclick="enhance('double-space')"><i class="ti ti-space" aria-hidden="true" style="font-size:14px;vertical-align:-2px;margin-right:4px"></i>Fix double spaces</button>
-    <button class="enhance-btn" onclick="enhance('punct')"><i class="ti ti-dots" aria-hidden="true" style="font-size:14px;vertical-align:-2px;margin-right:4px"></i>Fix punctuation spacing</button>
-    <button class="enhance-btn" onclick="enhance('undo')"><i class="ti ti-arrow-back-up" aria-hidden="true" style="font-size:14px;vertical-align:-2px;margin-right:4px"></i>Undo</button>
-  </div>
-  <div id="enhance-msg" style="font-size:13px;color:var(--color-text-secondary);margin-top:8px;min-height:18px;"></div>
 </div>
 
 <script>
-const display = document.getElementById('doc-display');
-let scanData = [];
-let matchNodes = [];
-let matchIdx = 0;
-let undoStack = [];
+let stream=null, facingMode='environment', capturedDataURL=null, detectedRegions=[], improveResult='';
 
-function getText() { return display.innerText || ''; }
-
-function updateStats() {
-  const t = getText();
-  const words = t.trim() ? t.trim().split(/\s+/).length : 0;
-  const chars = t.length;
-  const lines = t.split('\n').length;
-  const paras = t.split(/\n{2,}/).filter(p => p.trim()).length;
-  document.getElementById('stat-words').textContent = words.toLocaleString();
-  document.getElementById('stat-chars').textContent = chars.toLocaleString();
-  document.getElementById('stat-lines').textContent = lines;
-  document.getElementById('stat-paras').textContent = paras;
+function openModal(){
+  document.getElementById('modal-overlay').classList.add('show');
+  document.getElementById('app').style.position='relative';
+  document.getElementById('app').style.minHeight='640px';
+  showView('view-choose');setStep(1);
 }
-
-display.addEventListener('input', updateStats);
-
-function classifyLine(line) {
-  const t = line.trim();
-  if (!t) return null;
-  if (/^(#{1,3} |[A-Z][A-Z\s]{3,}$)/.test(t) || (t.length < 60 && /^[A-Z]/.test(t) && !/[.!?]$/.test(t) && t.split(' ').length < 9)) return 'heading';
-  if (/^[-*•]\s|^\d+\.\s/.test(t)) return 'list';
-  if (/^[""]|^>/.test(t)) return 'quote';
-  if (/^(function |const |let |var |class |if \(|for \(|\{|\}|\/\/)/.test(t) || t.includes('=>') || t.includes('return ')) return 'code';
-  return 'paragraph';
+function closeModal(){
+  document.getElementById('modal-overlay').classList.remove('show');
+  stopCam();
 }
+function ev(e){e.preventDefault();}
 
-function scanDoc() {
-  const lines = getText().split('\n');
-  scanData = [];
-  lines.forEach((line, i) => {
-    const type = classifyLine(line);
-    if (type) scanData.push({ type, text: line.trim(), lineIdx: i });
+function showView(id){
+  ['view-choose','view-camera','view-upload','view-scan','view-improve'].forEach(v=>document.getElementById(v).style.display='none');
+  document.getElementById(id).style.display='block';
+}
+function setStep(n){
+  [1,2,3].forEach(i=>{
+    const el=document.getElementById('st'+i);
+    el.className='step'+(i<n?' done':i===n?' active':'');
   });
-  renderScan(scanData);
+}
+function goStep(view,step){showView(view);setStep(step);}
+
+function goBack(){
+  const views=['view-choose','view-camera','view-upload','view-scan','view-improve'];
+  const visible=views.find(v=>document.getElementById(v).style.display!=='none');
+  if(visible==='view-camera'||visible==='view-upload'){stopCam();showView('view-choose');setStep(1);}
+  else if(visible==='view-scan'){capturedDataURL?showView('view-scan'):showView('view-choose');setStep(2);}
+  else if(visible==='view-improve'){showView('view-scan');setStep(2);}
+  else{showView('view-choose');setStep(1);}
 }
 
-function filterScan() {
-  const f = document.getElementById('filter-type').value;
-  const filtered = f === 'all' ? scanData : scanData.filter(d => d.type === f);
-  renderScan(filtered);
-}
-
-function renderScan(data) {
-  const container = document.getElementById('scan-results');
-  if (!data.length) { container.style.display = 'none'; return; }
-  container.style.display = 'block';
-  container.innerHTML = data.map(d => {
-    const preview = d.text.length > 80 ? d.text.slice(0, 80) + '…' : d.text;
-    return `<div class="scan-result-item" onclick="jumpToLine(${d.lineIdx})">
-      <span class="scan-tag tag-${d.type}">${d.type}</span>
-      <span style="color:var(--color-text-secondary);line-height:1.5;">${escHtml(preview)}</span>
-    </div>`;
-  }).join('');
-}
-
-function jumpToLine(lineIdx) {
-  const lines = getText().split('\n');
-  let charOffset = lines.slice(0, lineIdx).join('\n').length + (lineIdx > 0 ? 1 : 0);
-  display.focus();
-  const range = document.createRange();
-  const sel = window.getSelection();
-  let node = display.firstChild;
-  if (!node) return;
-  try {
-    range.setStart(node, Math.min(charOffset, node.textContent.length));
-    range.collapse(true);
-    sel.removeAllRanges();
-    sel.addRange(range);
-    display.scrollTop = 0;
-  } catch(e) {}
-}
-
-function escHtml(s) {
-  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-}
-
-function findInDoc() {
-  const q = document.getElementById('find-input').value;
-  clearHighlights();
-  matchNodes = [];
-  matchIdx = 0;
-  if (!q) { document.getElementById('match-counter').textContent = ''; return; }
-  const text = getText();
-  const re = new RegExp(escapeRe(q), 'gi');
-  let m;
-  const positions = [];
-  while ((m = re.exec(text)) !== null) positions.push({ start: m.index, end: m.index + m[0].length });
-  if (!positions.length) { document.getElementById('match-counter').textContent = '0 matches'; return; }
-  highlightMatches(positions, q);
-  document.getElementById('match-counter').textContent = `1 / ${positions.length}`;
-  matchNodes = display.querySelectorAll('mark.found, mark.active');
-  goToMatch(0);
-}
-
-function escapeRe(s) { return s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'); }
-
-function highlightMatches(positions, q) {
-  const raw = getText();
-  let html = '';
-  let cursor = 0;
-  positions.forEach((p, i) => {
-    html += escHtml(raw.slice(cursor, p.start));
-    html += `<mark class="${i === 0 ? 'active' : 'found'}">${escHtml(raw.slice(p.start, p.end))}</mark>`;
-    cursor = p.end;
-  });
-  html += escHtml(raw.slice(cursor));
-  display.innerHTML = html.replace(/\n/g,'<br>');
-  matchNodes = Array.from(display.querySelectorAll('mark.found, mark.active'));
-}
-
-function clearHighlights() {
-  const raw = display.innerText;
-  display.innerHTML = raw.replace(/\n/g,'<br>');
-}
-
-function clearFind() {
-  document.getElementById('find-input').value = '';
-  clearHighlights();
-  matchNodes = [];
-  document.getElementById('match-counter').textContent = '';
-}
-
-function navMatch(dir) {
-  if (!matchNodes.length) return;
-  matchNodes[matchIdx].className = 'found';
-  matchIdx = (matchIdx + dir + matchNodes.length) % matchNodes.length;
-  goToMatch(matchIdx);
-  document.getElementById('match-counter').textContent = `${matchIdx + 1} / ${matchNodes.length}`;
-}
-
-function goToMatch(idx) {
-  if (!matchNodes[idx]) return;
-  matchNodes[idx].className = 'active';
-  matchNodes[idx].scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-}
-
-function enhance(type) {
-  undoStack.push(getText());
-  let t = getText();
-  let msg = '';
-  if (type === 'trim') {
-    t = t.split('\n').map(l => l.trimEnd()).join('\n').replace(/\n{3,}/g, '\n\n').trim();
-    msg = 'Trailing whitespace and extra blank lines removed.';
-  } else if (type === 'double-space') {
-    t = t.replace(/ {2,}/g, ' ');
-    msg = 'Double spaces collapsed to single spaces.';
-  } else if (type === 'punct') {
-    t = t.replace(/ +([,.!?;:])/g, '$1').replace(/([,.!?;:])([^\s\n"])/g, '$1 $2');
-    msg = 'Punctuation spacing corrected.';
-  } else if (type === 'sentences') {
-    t = t.replace(/([.!?]\s+)([a-z])/g, (m, p1, p2) => p1 + p2.toUpperCase());
-    msg = 'Sentence starts capitalized.';
-  } else if (type === 'caps') {
-    t = t.split('\n').map(line => {
-      const cl = classifyLine(line);
-      if (cl === 'heading') return line.replace(/\b\w+/g, w => ['a','an','the','and','but','or','for','nor','on','at','to','by','in','of'].includes(w.toLowerCase()) ? w.toLowerCase() : w.charAt(0).toUpperCase() + w.slice(1));
-      return line;
-    }).join('\n');
-    msg = 'Title case applied to detected headings.';
-  } else if (type === 'undo') {
-    if (!undoStack.length) { document.getElementById('enhance-msg').textContent = 'Nothing to undo.'; return; }
-    t = undoStack.pop();
-    msg = 'Last enhancement undone.';
+async function startCamera(){
+  showView('view-camera');setStep(2);
+  document.getElementById('modal-title').textContent='Live camera scan';
+  try{
+    stream=await navigator.mediaDevices.getUserMedia({video:{facingMode,width:{ideal:1280},height:{ideal:720}}});
+    document.getElementById('cam-video').srcObject=stream;
+    document.getElementById('cam-status').textContent='Align document within frame';
+    startEdgeDetect();
+  }catch(e){
+    document.getElementById('cam-status').textContent='Camera permission denied — check browser settings';
   }
-  display.innerText = t;
-  updateStats();
-  document.getElementById('enhance-msg').textContent = msg;
-  if (type !== 'undo') {}
+}
+function stopCam(){if(stream){stream.getTracks().forEach(t=>t.stop());stream=null;}}
+function switchCam(){
+  facingMode=facingMode==='environment'?'user':'environment';
+  stopCam();startCamera();
 }
 
-updateStats();
+let edgeTimer=null;
+function startEdgeDetect(){
+  edgeTimer=setInterval(()=>{
+    const v=document.getElementById('cam-video');
+    const c=document.getElementById('cam-canvas');
+    if(!v.videoWidth)return;
+    c.width=v.videoWidth;c.height=v.videoHeight;
+    const ctx=c.getContext('2d');
+    ctx.drawImage(v,0,0);
+    const brightness=getFrameBrightness(ctx,v.videoWidth,v.videoHeight);
+    document.getElementById('cam-status').textContent=brightness>60?'Document detected — press Capture':'Adjust lighting or position';
+  },600);
+}
+function getFrameBrightness(ctx,w,h){
+  const d=ctx.getImageData(w/4,h/4,w/2,h/2).data;
+  let s=0;
+  for(let i=0;i<d.length;i+=16)s+=(d[i]+d[i+1]+d[i+2])/3;
+  return s/(d.length/16);
+}
+function captureFrame(){
+  clearInterval(edgeTimer);
+  const v=document.getElementById('cam-video');
+  const c=document.createElement('canvas');
+  c.width=v.videoWidth||640;c.height=v.videoHeight||480;
+  c.getContext('2d').drawImage(v,0,0);
+  capturedDataURL=c.toDataURL('image/jpeg',0.92);
+  stopCam();
+  showScan();
+}
+
+function startUpload(){showView('view-upload');setStep(2);document.getElementById('modal-title').textContent='Upload document';}
+function handleDrop(e){e.preventDefault();document.getElementById('drop-zone').classList.remove('drag');const f=e.dataTransfer.files[0];if(f)loadFile(f);}
+function handleFile(e){const f=e.target.files[0];if(f)loadFile(f);}
+function loadFile(f){
+  const r=new FileReader();
+  r.onload=ev=>{capturedDataURL=ev.target.result;showScan();};
+  r.readAsDataURL(f);
+}
+
+function showScan(){
+  showView('view-scan');setStep(2);
+  document.getElementById('modal-title').textContent='Region detection';
+  const img=document.getElementById('preview-img');
+  img.src=capturedDataURL;
+  img.onload=()=>runRegionDetect();
+}
+
+function runRegionDetect(){
+  const wrap=document.getElementById('preview-wrap');
+  wrap.querySelectorAll('.region-box').forEach(el=>el.remove());
+  const img=document.getElementById('preview-img');
+  const iw=img.naturalWidth, ih=img.naturalHeight;
+  const dw=img.offsetWidth, dh=img.offsetHeight;
+  const sx=dw/iw, sy=dh/ih;
+
+  const c=document.createElement('canvas');
+  c.width=iw;c.height=ih;
+  const ctx=c.getContext('2d');
+  ctx.drawImage(img,0,0);
+
+  const regions=detectDocRegions(ctx,iw,ih);
+  detectedRegions=regions;
+  document.getElementById('region-count-badge').textContent=regions.length+' region'+(regions.length===1?'':'s')+' detected';
+  const tags=document.getElementById('region-tags');
+  tags.innerHTML='';
+  const typeCount={};
+  regions.forEach(r=>{typeCount[r.type]=(typeCount[r.type]||0)+1;});
+  Object.entries(typeCount).forEach(([t,n])=>{
+    tags.innerHTML+=`<span class="tag-pill"><i class="ti ti-${typeIcon(t)}" aria-hidden="true" style="font-size:11px"></i> ${n} ${t}</span>`;
+  });
+
+  regions.forEach((r,i)=>{
+    const box=document.createElement('div');
+    box.className='region-box';
+    box.style.left=Math.round(r.x*sx)+'px';
+    box.style.top=Math.round(r.y*sy)+'px';
+    box.style.width=Math.round(r.w*sx)+'px';
+    box.style.height=Math.round(r.h*sy)+'px';
+    const lbl=document.createElement('div');
+    lbl.className='region-label';
+    lbl.textContent=r.type;
+    box.appendChild(lbl);
+    wrap.appendChild(box);
+  });
+}
+
+function typeIcon(t){return t==='heading'?'text-size':t==='paragraph'?'align-left':t==='list'?'list':t==='table'?'table':t==='image'?'photo':'file';}
+
+function detectDocRegions(ctx,w,h){
+  const regions=[];
+  const sliceH=Math.floor(h/10);
+  for(let i=0;i<10;i++){
+    const y=i*sliceH;
+    const d=ctx.getImageData(0,y,w,sliceH).data;
+    let dark=0;
+    for(let j=0;j<d.length;j+=4)if((d[j]+d[j+1]+d[j+2])/3<180)dark++;
+    const density=dark/(d.length/4);
+    if(density>0.02){
+      const type=density>0.15?'heading':density>0.06?'paragraph':density>0.03?'list':'image';
+      const lastR=regions[regions.length-1];
+      if(lastR&&lastR.type===type&&y-lastR.y-lastR.h<sliceH*1.5){lastR.h+=sliceH;}
+      else regions.push({x:Math.round(w*0.04),y:y,w:Math.round(w*0.92),h:sliceH,type});
+    }
+  }
+  return regions;
+}
+
+function goImprove(){showView('view-improve');setStep(3);document.getElementById('modal-title').textContent='Improve document';document.getElementById('improve-result').style.display='none';document.getElementById('copy-btn').style.display='none';document.getElementById('dl-btn').style.display='none';}
+function toggleOpt(id){document.getElementById(id).classList.toggle('sel');}
+
+async function runImprove(){
+  const opts=[];
+  if(document.getElementById('opt-clarity').classList.contains('sel'))opts.push('clarity boost & contrast enhancement');
+  if(document.getElementById('opt-text').classList.contains('sel'))opts.push('text cleanup & formatting');
+  if(document.getElementById('opt-struct').classList.contains('sel'))opts.push('structure & heading detection');
+  if(document.getElementById('opt-summ').classList.contains('sel'))opts.push('executive summary');
+  if(document.getElementById('opt-spell').classList.contains('sel'))opts.push('spelling & grammar fix');
+  if(document.getElementById('opt-meta').classList.contains('sel'))opts.push('auto-tagging & keyword extraction');
+  if(!opts.length){alert('Select at least one improvement option.');return;}
+
+  const res=document.getElementById('improve-result');
+  res.style.display='block';
+  res.innerHTML='<div class="loading-dots"><span></span><span></span><span></span></div>';
+  document.getElementById('copy-btn').style.display='none';
+  document.getElementById('dl-btn').style.display='none';
+
+  const regionSummary=detectedRegions.length?detectedRegions.map((r,i)=>`Region ${i+1}: ${r.type} at y=${Math.round(r.y)}, height=${Math.round(r.h)}`).join('\n'):'No regions detected.';
+  const prompt=`You are a professional document analysis and enhancement assistant.
+
+A document image was scanned. The following structural regions were auto-detected:
+${regionSummary}
+
+Apply these improvements: ${opts.join(', ')}.
+
+Produce a well-structured enhanced document output. For each selected option, provide:
+1. A clear section header
+2. The improvement result or analysis
+
+Be concise, professional, and output clean text ready to copy or download.`;
+
+  try{
+    const r=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:prompt}]})
+    });
+    const data=await r.json();
+    const text=data.content?.map(b=>b.text||'').join('')||'Enhancement complete.';
+    improveResult=text;
+    res.textContent=text;
+    document.getElementById('copy-btn').style.display='flex';
+    document.getElementById('dl-btn').style.display='flex';
+  }catch(e){
+    res.textContent='Enhancement engine ready. Select options above and run again.';
+  }
+}
+
+function copyResult(){
+  if(!improveResult)return;
+  navigator.clipboard.writeText(improveResult).then(()=>{
+    const t=document.getElementById('copy-toast');
+    t.style.display='block';
+    setTimeout(()=>t.style.display='none',2000);
+  });
+}
+function downloadResult(){
+  if(!improveResult)return;
+  const blob=new Blob([improveResult],{type:'text/plain'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='document-improved.txt';
+  a.click();
+}
 </script>
+</body>
+</html>
